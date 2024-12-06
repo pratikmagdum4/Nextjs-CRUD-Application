@@ -7,13 +7,21 @@ export default function RemoveBtn({ id }) {
         const confirmed = confirm("Are you Sure?");
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         if (confirmed) {
-            const res = await fetch(`${apiUrl}/api/topics?id=${id}`, {
-                method: "DELETE",
+            const res = await fetch(`${apiUrl}/api/topics?id=${id}`, { method: "DELETE" });
 
-            })
             if (res.ok) {
                 router.refresh();
             }
+            if (!res.ok) {
+                return {
+                    props: { topics: [] }, // Provide an empty fallback if fetching fails
+                };
+            }
+            const data = await res.json();
+
+            return {
+                props: { topics: data.topics },
+            };
         }
         // router.push("/")
     }

@@ -1,25 +1,22 @@
 import Link from "next/link";
 import RemoveBtn from "./Removebtn";
 import { HiPencilAlt } from 'react-icons/hi';
-
 const getTopics = async () => {
     try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const res = await fetch(`${apiUrl}/api/topics`, {
-            cache: 'no-store',
-        })
-        if (!res.ok) {
-            throw new Error("Failed to fetch the data");
-        }
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+        const res = await fetch(`${apiUrl}/api/topics`, { cache: 'no-store' });
+        if (!res.ok) throw new Error("Failed to fetch the data");
         return res.json();
     } catch (error) {
-        console.log("Error loading the topics", error);
+        console.error("Error loading the topics:", error);
+        return { topics: [] }; // Return fallback data
     }
-}
+};
+
 export default async function TopicsList() {
     const { topics } = await getTopics();
-    const gotTopics = topics.topics;
-    console.log("The topics are ", gotTopics)
+    // const gotTopics = topics.topics;
+    console.log("The topics are ", topics)
     return (
         <>
             {topics.map(t => (

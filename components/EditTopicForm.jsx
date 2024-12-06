@@ -20,6 +20,7 @@ export default function EditTopicForm({ id, title, description }) {
                 body: JSON.stringify({ newTitle, newDescription }),
             });
 
+
             if (res.ok) {
                 await router.push("/"); // Navigate only on success
             } else {
