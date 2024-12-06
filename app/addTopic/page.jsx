@@ -3,11 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 export default function AddTopic() {
-    console.log("hi");
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const router = useRouter();
-    // Optionally, you can handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!title || !description) {

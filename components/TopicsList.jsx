@@ -1,5 +1,5 @@
 import Link from "next/link";
-import RemoveBtn from "./RemoveBtn";
+import RemoveBtn from "./Removebtn";
 import { HiPencilAlt } from 'react-icons/hi';
 
 const getTopics = async () => {
