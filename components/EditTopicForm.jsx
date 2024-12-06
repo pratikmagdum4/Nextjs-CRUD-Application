@@ -1,5 +1,4 @@
 "use client";
-
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -7,9 +6,7 @@ export default function EditTopicForm({ id, title, description }) {
     const [newTitle, setNewTitle] = useState(title);
     const [newDescription, setNewDescription] = useState(description);
     const router = useRouter();
-    console.log("THe id is", id);
-    console.log("THe title is", title);
-    console.log("THe description is", description);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -19,37 +16,34 @@ export default function EditTopicForm({ id, title, description }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ newTitle, newDescription }),
             });
-
-
             if (res.ok) {
                 await router.push("/"); // Navigate only on success
             } else {
                 console.error("Failed to update topic:", await res.text());
             }
         } catch (error) {
-            console.error("The error is:", error);
+            console.error("Error:", error);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-6 bg-gradient-to-r from-teal-400 to-blue-500 rounded-lg shadow-xl text-white">
             <input
                 onChange={(e) => setNewTitle(e.target.value)}
-                value={newTitle} // Use newTitle for two-way binding
-                className="border border-slate-500 px-8 py-2"
+                value={newTitle}
+                className="border border-white bg-transparent px-8 py-3 rounded-lg text-lg placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                 type="text"
                 placeholder="Topic Title"
             />
-            <input
+            <textarea
                 onChange={(e) => setNewDescription(e.target.value)}
-                value={newDescription} // Use newDescription for two-way binding
-                className="border border-slate-500 px-8 py-2"
-                type="text"
+                value={newDescription}
+                className="border border-white bg-transparent px-8 py-3 rounded-lg text-lg placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                 placeholder="Topic Description"
             />
             <button
                 type="submit"
-                className="bg-green-600 font-bold text-white py-3 px-6 w-fit"
+                className="bg-green-600 font-bold text-white py-3 px-8 rounded-full mt-4 hover:bg-green-700 transition-all duration-300"
             >
                 Update Topic
             </button>
