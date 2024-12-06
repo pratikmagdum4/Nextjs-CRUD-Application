@@ -1,23 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AddTopic() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [isRecordingTitle, setIsRecordingTitle] = useState(false); // Track recording status for title
-    const [isRecordingDescription, setIsRecordingDescription] = useState(false); // Track recording status for description
+    const [isRecordingTitle, setIsRecordingTitle] = useState(false);
+    const [isRecordingDescription, setIsRecordingDescription] = useState(false);
+    const [recognition, setRecognition] = useState(null); // Initialize recognition state
     const router = useRouter();
 
-    // Initialize speech recognition API
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    useEffect(() => {
+        // Initialize SpeechRecognition only in the browser
+        if (typeof window !== "undefined") {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognitionInstance = new SpeechRecognition();
+            recognitionInstance.lang = "en-US";
+            recognitionInstance.interimResults = false;
+            recognitionInstance.maxAlternatives = 1;
+            setRecognition(recognitionInstance);
+        }
+    }, []);
 
-    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!title || !description) {
@@ -41,46 +46,34 @@ export default function AddTopic() {
                 throw new Error("Error adding topic");
             }
         } catch (error) {
-            console.log("Error Add", error);
+            console.error("Error Add", error);
         }
 
         console.log("Form submitted");
     };
 
-    // Start or stop the speech recognition for the title field
-    const toggleSpeechRecognitionTitle = () => {
-        if (isRecordingTitle) {
-            recognition.stop(); // Stop recording
-            setIsRecordingTitle(false); // Update button to reflect stopped state
-        } else {
-            recognition.start(); // Start recording
-            setIsRecordingTitle(true); // Update button to reflect recording state
-        }
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            setTitle(transcript); // Update title with the transcript
-        };
-
-        recognition.onerror = (event) => {
-            console.error("Speech recognition error:", event.error);
+    const toggleSpeechRecognition = (field) => {
+        if (!recognition) {
+            console.error("SpeechRecognition is not supported in this environment");
             return;
-        };
-    };
+        }
 
-    // Start or stop the speech recognition for the description field
-    const toggleSpeechRecognitionDescription = () => {
-        if (isRecordingDescription) {
-            recognition.stop(); // Stop recording
-            setIsRecordingDescription(false); // Update button to reflect stopped state
+        const isRecording = field === "title" ? isRecordingTitle : isRecordingDescription;
+
+        if (isRecording) {
+            recognition.stop();
+            if (field === "title") setIsRecordingTitle(false);
+            if (field === "description") setIsRecordingDescription(false);
         } else {
-            recognition.start(); // Start recording
-            setIsRecordingDescription(true); // Update button to reflect recording state
+            recognition.start();
+            if (field === "title") setIsRecordingTitle(true);
+            if (field === "description") setIsRecordingDescription(true);
         }
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
-            setDescription(transcript); // Update description with the transcript
+            if (field === "title") setTitle(transcript);
+            if (field === "description") setDescription(transcript);
         };
 
         recognition.onerror = (event) => {
@@ -91,7 +84,6 @@ export default function AddTopic() {
     return (
         <div className="flex flex-col gap-6">
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                {/* Title input with separate start/stop recording button */}
                 <div className="relative">
                     <input
                         onChange={(e) => setTitle(e.target.value)}
@@ -102,14 +94,13 @@ export default function AddTopic() {
                     />
                     <button
                         type="button"
-                        onClick={toggleSpeechRecognitionTitle}
+                        onClick={() => toggleSpeechRecognition("title")}
                         className={`absolute top-0 right-0 p-2 ${isRecordingTitle ? 'bg-red-500' : 'bg-gray-200'} rounded-full`}
                     >
                         {isRecordingTitle ? 'Stop' : 'Start'} 🎤
                     </button>
                 </div>
 
-                {/* Description input with separate start/stop recording button */}
                 <div className="relative">
                     <input
                         onChange={(e) => setDescription(e.target.value)}
@@ -120,7 +111,7 @@ export default function AddTopic() {
                     />
                     <button
                         type="button"
-                        onClick={toggleSpeechRecognitionDescription}
+                        onClick={() => toggleSpeechRecognition("description")}
                         className={`absolute top-0 right-0 p-2 ${isRecordingDescription ? 'bg-red-500' : 'bg-gray-200'} rounded-full`}
                     >
                         {isRecordingDescription ? 'Stop' : 'Start'} 🎤
